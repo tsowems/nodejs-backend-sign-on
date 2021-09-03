@@ -40,6 +40,7 @@ class AuthenticationController implements Controller {
       this.registration
     );
     this.router.post(`${this.path}/activate`, this.activateAccount);
+    this.router.post(`${this.path}/activation-email`, this.activationEmail);
     this.router.post(`${this.path}/signin`, validationMiddleware(LogInDto), this.loggingIn);
     this.router.post(`${this.path}/google-login`, this.googleLoggingIn);
     this.router.post(
@@ -376,6 +377,19 @@ class AuthenticationController implements Controller {
       );
     }
   };
+
+  private activationEmail = async (request: Request, response: Response, next: NextFunction) => {
+    try {
+    const email = request.body.email;
+     await this.authenticationService.activationEmail(email);
+    //  return response.json({
+    //   message: `Activation Email Sent, Link expires in 2 hours`,
+    // });
+  }
+  catch (error) {
+    next(error);
+  }
+}
 }
 
 export default AuthenticationController;

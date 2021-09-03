@@ -96,25 +96,6 @@ class UserController implements Controller {
       next(new UserNotFoundException(id));
     }
   };
-  //   private modifyUser = async (
-  //     request: Request,
-  //     response: Response,
-  //     next: NextFunction
-  //   ) => {
-  //     const email = request.params.email;
-  //     const userData: User = request.body;
-  //     const user_details = await this.user.findOne({ email });
-  //     if (user_details) {
-  //       const id = user_details._id;
-  //       const user = await this.user.findByIdAndUpdate(id, userData, {
-  //         new: true,
-  //       });
-  //       if (user) {
-  //         response.send(user);
-  //       } else {
-  //         next(new UserNotFoundException(id));
-  //       }
-  //     }
 }
 
 export default UserController;

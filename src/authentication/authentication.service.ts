@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import Hashids from "hashids";
 import { NextFunction } from "express";
 import UserWithThatEmailAlreadyExistsException from "../exceptions/UserWithThatEmailAlreadyExistsException";
+import UserAlreadyActivated from "../exceptions/UserAlreadyActivated";
 import WrongCredentialsException from "../exceptions/WrongCredentialsException";
 import DataStoredInToken from "../interfaces/dataStoredInToken";
 import TokenData from "../interfaces/tokenData.interface";
@@ -71,6 +72,36 @@ class AuthenticationService {
       refreshToken,
       token: jwt.sign(dataStoredInToken, secret, { expiresIn }),
     };
+  }
+
+  public async activationEmail(email: any) {
+    if (await this.user.findOne({ email: email, status: "Pending" })) {
+      const deHyphenatedUUID = uuidv4().replace(/-/gi, "");
+      const encodedId = hashids.encodeHex(deHyphenatedUUID);
+      const token = jwt.sign({ email: email }, process.env.JWT_ACCOUNT_ACTIVATION, {
+        expiresIn: "120m",
+      });
+      const user = await this.user.findOneAndUpdate(email, {
+        confirmationCode: token,
+      });
+
+      const subject = `Account Activation Link`;
+      const content = `
+    <p>Please use the following link to activate your acccount:</p>
+    <p>${process.env.CLIENT_URL}/auth/account/activate/${token}</p>
+    <hr />
+    <p>This email may contain sensetive information</p>
+          `;
+      email_sender(subject, email, content, "any", user.firstName);
+
+      if (user) {
+        return {
+          encodedId,
+        };
+      }
+    } else {
+      throw new UserAlreadyActivated(email);
+    }
   }
 }
 

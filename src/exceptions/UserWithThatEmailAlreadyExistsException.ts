@@ -7,3 +7,4 @@ class UserWithThatEmailAlreadyExistsException extends HttpException {
 }
 
 export default UserWithThatEmailAlreadyExistsException;
+
