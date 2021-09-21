@@ -1,15 +1,16 @@
 import { Router, Request, Response, NextFunction } from "express";
 import Controller from "../interfaces/controller.interface";
 import authMiddleware from "../middleware/auth.middleware";
+import adminAuthMiddleware from "../middleware/adminAuth.middleware";
 import { pictureUpload } from "../middleware/uploads.middleware";
 import userModel from "./user.model";
 import UserNotFoundException from "../exceptions/UserNotFoundException";
-
+import validationMiddleware from "../middleware/validation.middleware";
+import CreateProfileDto from "../user/profile.dto";
 
 class UserController implements Controller {
   public path = "/api/users";
   public router = Router();
-
   private user = userModel;
 
   constructor() {
@@ -23,9 +24,10 @@ class UserController implements Controller {
       [pictureUpload.single("file")],
       this.updateProfile
     );
-    this.router.get(`${this.path}/profile`, authMiddleware, this.userProfile);
+    this.router.get(`${this.path}/profile`, authMiddleware, validationMiddleware(CreateProfileDto), this.userProfile);
     this.router.get(`${this.path}/access`, authMiddleware, this.userAccess);
     this.router.get(`${this.path}/:id`, authMiddleware, this.getUserById);
+    this.router.put(`${this.path}/user_role`, adminAuthMiddleware, this.updateUserRole);
   }
 
   private userProfile = async (request: any, response: Response, next: NextFunction) => {
@@ -60,7 +62,8 @@ class UserController implements Controller {
   };
 
   private updateProfile = async (request: any, response: Response, next: NextFunction) => {
-    const { company, referral } = request.body;
+    const profileData: CreateProfileDto = request.body;
+    const { company, referral } = profileData
     const user_id = request.user._id;
     const imageUrl = request.file.location;
     if (company && imageUrl) {
@@ -96,6 +99,29 @@ class UserController implements Controller {
       next(new UserNotFoundException(id));
     }
   };
+
+  private updateUserRole = async (request: any, response: Response, next: NextFunction) => {
+    try{
+    //const user_id = request.user._id;
+    const {email, role} = request.body;
+    const user = await this.user.findOne({ email });
+    await this.user.findByIdAndUpdate(
+      user._id,
+      {
+        userRole: role
+      }
+    )
+    return response
+    .status(200)
+    .send({ message: `User updated to ${role}` });
+  }
+    catch (err) {
+      console.log(err)  
+      return response
+          .status(400)
+          .send({ message: "Unable to Change user Role" });
+  }
+  }
 }
 
 export default UserController;

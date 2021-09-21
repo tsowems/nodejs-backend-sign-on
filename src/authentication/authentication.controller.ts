@@ -79,6 +79,7 @@ class AuthenticationController implements Controller {
         });
       }
     } catch (error) {
+      return response.status(400).send({ message: "Unable to register user, email already exist" });
       next(error);
     }
   };
@@ -88,6 +89,7 @@ class AuthenticationController implements Controller {
     const redirect_url = request.body.redirect_url;
     const allowed = origin.split(",");
     const domainresp = this.findOrigin(allowed, redirect_url);
+    
     if ((redirect_url && domainresp >= 0) || !redirect_url) {
       const logInData: LogInDto = request.body;
       const user = await this.user.findOne({ email: logInData.email });
@@ -131,6 +133,7 @@ class AuthenticationController implements Controller {
   };
 
   private activateAccount = async (request: any, response: Response, next: NextFunction) => {
+    try{
     const token = request.body.token;
     if (token) {
       jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, function (err: any, decoded: any) {
@@ -165,7 +168,10 @@ class AuthenticationController implements Controller {
         });
       });
     }
-  };
+  } catch (err) {
+    return response.status(400).send({ message: "unable to activate account" });
+  }
+}
 
   private authorizeUser = async (request: Request, response: Response, next: NextFunction) => {
     const { code, email } = request.body;
@@ -329,7 +335,7 @@ class AuthenticationController implements Controller {
     if (!update) {
       return response.json({ message: "Not successful" });
     } else {
-      email_sender(subject, email, content, "any", user.firstName);
+      email_sender(subject, email, content);
       return response.json({
         message: `Email has been sent to ${email}. Follow the instructions to reset your password. Link expires in 10min.`,
       });
@@ -381,10 +387,7 @@ class AuthenticationController implements Controller {
   private activationEmail = async (request: Request, response: Response, next: NextFunction) => {
     try {
     const email = request.body.email;
-     await this.authenticationService.activationEmail(email);
-    //  return response.json({
-    //   message: `Activation Email Sent, Link expires in 2 hours`,
-    // });
+    await this.authenticationService.activationEmail(email);
   }
   catch (error) {
     next(error);

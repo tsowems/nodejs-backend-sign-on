@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     email: String,
     firstName: String,
     lastName: String,
+    userRole: {type: String, enum: ["Member", "Staff", "Admin"], default: "Member" },
     userCode: String,
     resetPasswordLink: String,
     password: {
@@ -30,6 +31,7 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    created: {type:Date, default:Date.now},
   },
   {
     toJSON: {

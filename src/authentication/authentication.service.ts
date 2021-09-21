@@ -47,7 +47,7 @@ class AuthenticationService {
     <hr />
     <p>This email may contain sensetive information</p>
           `;
-    email_sender(subject, userData.email, content, "any", user.firstName);
+    email_sender(subject, userData.email, content);
 
     if (user) {
       return {
@@ -92,7 +92,7 @@ class AuthenticationService {
     <hr />
     <p>This email may contain sensetive information</p>
           `;
-      email_sender(subject, email, content, "any", user.firstName);
+      email_sender(subject, email, content);
 
       if (user) {
         return {

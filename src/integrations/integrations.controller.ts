@@ -4,6 +4,9 @@ import Controller from "../interfaces/controller.interface";
 import CreateIntegrationDto from "./integration.dto";
 import authMiddleware from "../middleware/auth.middleware";
 import integrationsModel from "./integrations.model";
+import validationMiddleware from "../middleware/validation.middleware";
+
+
 
 import axios from "axios";
 
@@ -19,7 +22,7 @@ class IntegrationController implements Controller {
   private initializeRoutes() {
     this.router.get(`${this.path}/getAuthorized`, this.getAuthorized);
     this.router.get(`${this.path}/allowfinaccess`, this.allowAccess);
-    this.router.post(`${this.path}/newIntegration`, authMiddleware, this.createIntegration);
+    this.router.post(`${this.path}/newIntegration`, authMiddleware,validationMiddleware(CreateIntegrationDto), this.createIntegration);
     this.router.post(`${this.path}/allIntegrations`, authMiddleware, this.allIntegration);
     this.router.delete(`${this.path}/:id`, authMiddleware, this.deleteIntegration);
   }
@@ -38,7 +41,8 @@ class IntegrationController implements Controller {
   private createIntegration = async (request: any, response: Response, next: NextFunction) => {
     try {
       const user_id = request.user._id;
-      const { code, alias } = request.body;
+      const integrationData: CreateIntegrationDto = request.body;
+      const { code, alias } = integrationData;
 
       const client_id = process.env.WEBFLOW_CLIENT_ID;
       const client_secret = process.env.WEBFLOW_CLIENT_SECRET;
