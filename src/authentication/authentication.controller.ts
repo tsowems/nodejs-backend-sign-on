@@ -48,6 +48,7 @@ class AuthenticationController implements Controller {
       validationMiddleware(AuthorizeDto),
       this.authorizeUser
     );
+    this.router.post(`${this.path}/authcode`, this.authUser);
     this.router.post(`${this.path}/refresh-token`, this.refresh_token);
 
     this.router.post(`${this.path}/logout`, this.loggingOut);
@@ -176,6 +177,21 @@ class AuthenticationController implements Controller {
   private authorizeUser = async (request: Request, response: Response, next: NextFunction) => {
     const { code, email } = request.body;
     const user = await this.user.findOne({ email, userCode: code });
+    if (user) {
+      const token = this.createToken(user);
+      await this.user.findByIdAndUpdate(user._id, {
+        refreshToken: token.refreshToken,
+      });
+      response.setHeader("Set-Cookie", [this.createCookie(token)]);
+      response.send({ user, token });
+    } else {
+      next(new WrongCredentialsException());
+    }
+  };
+
+  private authUser = async (request: Request, response: Response, next: NextFunction) => {
+    const { code } = request.body;
+    const user = await this.user.findOne({ userCode: code });
     if (user) {
       const token = this.createToken(user);
       await this.user.findByIdAndUpdate(user._id, {

@@ -5,7 +5,7 @@ import adminAuthMiddleware from "../middleware/adminAuth.middleware";
 import { pictureUpload } from "../middleware/uploads.middleware";
 import userModel from "./user.model";
 import UserNotFoundException from "../exceptions/UserNotFoundException";
-import validationMiddleware from "../middleware/validation.middleware";
+//import validationMiddleware from "../middleware/validation.middleware";
 import CreateProfileDto from "../user/profile.dto";
 
 class UserController implements Controller {
@@ -24,7 +24,7 @@ class UserController implements Controller {
       [pictureUpload.single("file")],
       this.updateProfile
     );
-    this.router.get(`${this.path}/profile`, authMiddleware, validationMiddleware(CreateProfileDto), this.userProfile);
+    this.router.get(`${this.path}/profile`, authMiddleware, this.userProfile);
     this.router.get(`${this.path}/access`, authMiddleware, this.userAccess);
     this.router.get(`${this.path}/:id`, authMiddleware, this.getUserById);
     this.router.put(`${this.path}/user_role`, adminAuthMiddleware, this.updateUserRole);
