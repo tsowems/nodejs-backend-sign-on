@@ -53,12 +53,7 @@ class App {
     });
   }
   private connectToTheDatabase() {
-    // const {
-    //   MONGO_USER,
-    //   MONGO_PASSWORD,
-    //   MONGO_PATH,
-    // } = process.env;
-    mongoose.connect("mongodb://127.0.0.1:27017/finsweetsso");
+    mongoose.connect("mongodb://127.0.0.1:27017/sso");
   }
 }
 
