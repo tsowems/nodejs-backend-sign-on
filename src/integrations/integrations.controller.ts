@@ -47,7 +47,7 @@ class IntegrationController implements Controller {
       const client_id = process.env.WEBFLOW_CLIENT_ID;
       const client_secret = process.env.WEBFLOW_CLIENT_SECRET;
       if (code && alias) {
-        let payload = {
+        const payload = {
           client_id,
           client_secret,
           code,
