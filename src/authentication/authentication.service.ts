@@ -85,7 +85,7 @@ class AuthenticationService {
         confirmationCode: token,
       });
 
-      const subject = `Account Activation Link`;
+      const subject = "Account Activation Link";
       const content = `
     <p>Please use the following link to activate your acccount:</p>
     <p>${process.env.CLIENT_URL}/auth/account/activate/${token}</p>

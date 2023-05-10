@@ -55,7 +55,7 @@ class AuthenticationController implements Controller {
     this.router.get(`${this.path}/signout`, this.loggingOut);
   }
 
-  private findOrigin(allowed: any, redirect_url: any) {
+  private findOrigin(allowed: any, redirect_url: string) {
     return allowed.indexOf(redirect_url);
   }
 
@@ -365,13 +365,13 @@ class AuthenticationController implements Controller {
       jwt.verify(
         resetPasswordLink,
         process.env.JWT_RESET_PASSWORD,
-        function (err: any, decoded: any) {
+        function (err: Error, decoded: string) {
           if (err) {
             return response.status(401).json({
               error: "Expired link. Try again",
             });
           }
-          userModel.findOne({ resetPasswordLink }, (err: any, user: any) => {
+          userModel.findOne({ resetPasswordLink }, (err: Error, user: any) => {
             if (err || !user) {
               return response.status(401).json({
                 error: "Something went wrong. Try later",
@@ -384,14 +384,14 @@ class AuthenticationController implements Controller {
 
             user = _.extend(user, updatedFields);
 
-            user.save((err: any, result: any) => {
+            user.save((err: Error, result: any) => {
               if (err) {
                 return response.status(400).json({
                   error: "Cannot update passowrd",
                 });
               }
               response.json({
-                message: `Great! Now you can login with your new password`,
+                message: "Great! Now you can login with your new password",
               });
             });
           });
