@@ -14,7 +14,7 @@ import User from "../user/user.interface";
 import userModel from "./../user/user.model";
 import AuthenticationService from "./authentication.service";
 import LogInDto from "./logIn.dto";
-import AuthorizeDto from "./authorize.dto";
+import Authorize from "./authorize.dto";
 //const { OAuth2Client } = require("google-auth-library");
 
 import _ from "lodash";
@@ -45,7 +45,7 @@ class AuthenticationController implements Controller {
     //this.router.post(`${this.path}/google-login`, this.googleLoggingIn);
     this.router.post(
       `${this.path}/authorize`,
-      validationMiddleware(AuthorizeDto),
+      validationMiddleware(Authorize),
       this.authorizeUser
     );
     this.router.post(`${this.path}/authcode`, this.authUser);
@@ -80,8 +80,8 @@ class AuthenticationController implements Controller {
         });
       }
     } catch (error) {
+    console.log(error)
       return response.status(400).send({ message: "Unable to register user, email already exist" });
-      next(error);
     }
   };
 
@@ -137,13 +137,13 @@ class AuthenticationController implements Controller {
     try{
     const token = request.body.token;
     if (token) {
-      jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, function (err: any, decoded: any) {
+      jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, function (err: Error, decoded: any) {
         if (err) {
           return response.status(401).json({
             error: "Expired link. Signup again",
           });
         }
-        userModel.findOne({ confirmationCode: token }, (err: any, user: any) => {
+        userModel.findOne({ confirmationCode: token }, (err: Error, user: any) => {
           if (err || !user) {
             return response.status(401).json({
               error: "Something went wrong. Possible you've verified account already. Try to login",
@@ -156,7 +156,7 @@ class AuthenticationController implements Controller {
 
           user = _.extend(user, updatedFields);
 
-          user.save((err: any, result: any) => {
+          user.save((err: Error, result: any) => {
             if (err) {
               return response.status(400).json({
                 error: "Cannot activate account at the moment",
@@ -335,7 +335,7 @@ class AuthenticationController implements Controller {
       expiresIn: "10m",
     });
 
-    const subject = `Password reset link`;
+    const subject = "Password reset link";
     const content = `
               <p>Please click the link below to reset your password:</p>
               <p>${process.env.CLIENT_URL}/auth/password/reset/${token}</p>
