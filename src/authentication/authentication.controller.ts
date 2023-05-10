@@ -15,12 +15,12 @@ import userModel from "./../user/user.model";
 import AuthenticationService from "./authentication.service";
 import LogInDto from "./logIn.dto";
 import AuthorizeDto from "./authorize.dto";
-const { OAuth2Client } = require("google-auth-library");
+//const { OAuth2Client } = require("google-auth-library");
 
 import _ from "lodash";
 
 const hashids = new Hashids();
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+//const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 class AuthenticationController implements Controller {
   public path = "/api/auth";
   public router = Router();
@@ -42,7 +42,7 @@ class AuthenticationController implements Controller {
     this.router.post(`${this.path}/activate`, this.activateAccount);
     this.router.post(`${this.path}/activation-email`, this.activationEmail);
     this.router.post(`${this.path}/signin`, validationMiddleware(LogInDto), this.loggingIn);
-    this.router.post(`${this.path}/google-login`, this.googleLoggingIn);
+    //this.router.post(`${this.path}/google-login`, this.googleLoggingIn);
     this.router.post(
       `${this.path}/authorize`,
       validationMiddleware(AuthorizeDto),
@@ -163,7 +163,7 @@ class AuthenticationController implements Controller {
               });
             }
             response.json({
-              message: `Great, account activated`,
+              message: "Great, account activated",
             });
           });
         });
@@ -209,86 +209,86 @@ class AuthenticationController implements Controller {
     response.send(200);
   };
 
-  private googleLoggingIn = (req: any, res: any) => {
-    const idToken = req.body.tokenId;
-    const redirect_url = req.body.redirect_url;
+  // private googleLoggingIn = (req: any, res: any) => {
+  //   const idToken = req.body.tokenId;
+  //   const redirect_url = req.body.redirect_url;
 
-    client.verifyIdToken({ idToken, audience: process.env.GOOGLE_CLIENT_ID }).then(
-      (respo: {
-        payload: {
-          email_verified: any;
-          familyName: any;
-          name: any;
-          email: any;
-          givenName: any;
-          picture: any;
-          jti: any;
-        };
-      }) => {
-        const { email_verified, email, name, picture, jti } = respo.payload;
-        const fullname = name.split(/[ ,]+/);
-        const givenName = fullname[0];
-        const familyName = fullname[1];
-        if (email_verified) {
-          this.user.findOne({ email }).exec(async (err, user) => {
-            if (user) {
-              const deHyphenatedUUID = uuidv4().replace(/-/gi, "");
-              const encodedId = hashids.encodeHex(deHyphenatedUUID);
-              const updated = await this.user.findByIdAndUpdate(
-                user._id,
-                { userCode: encodedId },
-                { new: true }
-              );
-              if (updated) {
-                res.send({
-                  userCode: encodedId,
-                  email: email,
-                  redirect_url: redirect_url ? redirect_url : "",
-                });
-              }
-              res.send({ message: "Unable to login at the moment" });
-            } else {
-              const password = jti;
-              user = new this.user({
-                firstName: givenName,
-                lastName: familyName,
-                email,
-                password,
-                status: "Active",
-                profile: {
-                  imageUrl: picture,
-                },
-              });
-              user.save(async (err: any, data: any) => {
-                if (err) {
-                  return res.status(400).json({
-                    message: "An error occured",
-                  });
-                }
-                const deHyphenatedUUID = uuidv4().replace(/-/gi, "");
-                const encodedId = hashids.encodeHex(deHyphenatedUUID);
-                const updated = await this.user.findByIdAndUpdate(user._id, {
-                  userCode: encodedId,
-                });
-                if (updated) {
-                  res.send({
-                    userCode: encodedId,
-                    email: email,
-                    redirect_url: redirect_url ? redirect_url : "",
-                  });
-                }
-              });
-            }
-          }); //end of find user
-        } else {
-          return res.status(400).json({
-            error: "Google login failed. Try again.",
-          });
-        }
-        //end of if verified email
-      }
-    ); //end of client verification
-  };
+  //   client.verifyIdToken({ idToken, audience: process.env.GOOGLE_CLIENT_ID }).then(
+  //     (respo: {
+  //       payload: {
+  //         email_verified: any;
+  //         familyName: any;
+  //         name: any;
+  //         email: any;
+  //         givenName: any;
+  //         picture: any;
+  //         jti: any;
+  //       };
+  //     }) => {
+  //       const { email_verified, email, name, picture, jti } = respo.payload;
+  //       const fullname = name.split(/[ ,]+/);
+  //       const givenName = fullname[0];
+  //       const familyName = fullname[1];
+  //       if (email_verified) {
+  //         this.user.findOne({ email }).exec(async (err, user) => {
+  //           if (user) {
+  //             const deHyphenatedUUID = uuidv4().replace(/-/gi, "");
+  //             const encodedId = hashids.encodeHex(deHyphenatedUUID);
+  //             const updated = await this.user.findByIdAndUpdate(
+  //               user._id,
+  //               { userCode: encodedId },
+  //               { new: true }
+  //             );
+  //             if (updated) {
+  //               res.send({
+  //                 userCode: encodedId,
+  //                 email: email,
+  //                 redirect_url: redirect_url ? redirect_url : "",
+  //               });
+  //             }
+  //             res.send({ message: "Unable to login at the moment" });
+  //           } else {
+  //             const password = jti;
+  //             user = new this.user({
+  //               firstName: givenName,
+  //               lastName: familyName,
+  //               email,
+  //               password,
+  //               status: "Active",
+  //               profile: {
+  //                 imageUrl: picture,
+  //               },
+  //             });
+  //             user.save(async (err: any, data: any) => {
+  //               if (err) {
+  //                 return res.status(400).json({
+  //                   message: "An error occured",
+  //                 });
+  //               }
+  //               const deHyphenatedUUID = uuidv4().replace(/-/gi, "");
+  //               const encodedId = hashids.encodeHex(deHyphenatedUUID);
+  //               const updated = await this.user.findByIdAndUpdate(user._id, {
+  //                 userCode: encodedId,
+  //               });
+  //               if (updated) {
+  //                 res.send({
+  //                   userCode: encodedId,
+  //                   email: email,
+  //                   redirect_url: redirect_url ? redirect_url : "",
+  //                 });
+  //               }
+  //             });
+  //           }
+  //         }); //end of find user
+  //       } else {
+  //         return res.status(400).json({
+  //           error: "Google login failed. Try again.",
+  //         });
+  //       }
+  //       //end of if verified email
+  //     }
+  //   ); //end of client verification
+  // };
 
   private createCookie(tokenData: TokenData) {
     return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;

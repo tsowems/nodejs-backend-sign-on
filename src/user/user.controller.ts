@@ -2,11 +2,11 @@ import { Router, Request, Response, NextFunction } from "express";
 import Controller from "../interfaces/controller.interface";
 import authMiddleware from "../middleware/auth.middleware";
 import adminAuthMiddleware from "../middleware/adminAuth.middleware";
-import { pictureUpload } from "../middleware/uploads.middleware";
+//import { pictureUpload } from "../middleware/uploads.middleware";
 import userModel from "./user.model";
 import UserNotFoundException from "../exceptions/UserNotFoundException";
 //import validationMiddleware from "../middleware/validation.middleware";
-import CreateProfileDto from "../user/profile.dto";
+//import CreateProfileDto from "../user/profile.dto";
 
 class UserController implements Controller {
   public path = "/api/users";
@@ -18,12 +18,12 @@ class UserController implements Controller {
   }
 
   private initializeRoutes() {
-    this.router.put(
-      `${this.path}/updateProfile`,
-      authMiddleware,
-      [pictureUpload.single("file")],
-      this.updateProfile
-    );
+    // this.router.put(
+    //   `${this.path}/updateProfile`,
+    //   authMiddleware,
+    //   [pictureUpload.single("file")],
+    //   this.updateProfile
+    // );
     this.router.get(`${this.path}/profile`, authMiddleware, this.userProfile);
     this.router.get(`${this.path}/access`, authMiddleware, this.userAccess);
     this.router.get(`${this.path}/:id`, authMiddleware, this.getUserById);
@@ -61,30 +61,30 @@ class UserController implements Controller {
     }
   };
 
-  private updateProfile = async (request: any, response: Response, next: NextFunction) => {
-    const profileData: CreateProfileDto = request.body;
-    const { company, referral } = profileData
-    const user_id = request.user._id;
-    const imageUrl = request.file.location;
-    if (company && imageUrl) {
-      const updated = await this.user.findByIdAndUpdate(
-        user_id,
-        {
-          profile: {
-            company,
-            imageUrl,
-            referral,
-          },
-        },
-        { new: true }
-      );
-      if (updated) {
-        response.send("Upload sucessful");
-      }
-    } else {
-      response.send({ message: "Unable to upload at the moment" });
-    }
-  };
+  // private updateProfile = async (request: any, response: Response, next: NextFunction) => {
+  //   const profileData: CreateProfileDto = request.body;
+  //   const { company, referral } = profileData
+  //   const user_id = request.user._id;
+  //   const imageUrl = request.file.location;
+  //   if (company && imageUrl) {
+  //     const updated = await this.user.findByIdAndUpdate(
+  //       user_id,
+  //       {
+  //         profile: {
+  //           company,
+  //           imageUrl,
+  //           referral,
+  //         },
+  //       },
+  //       { new: true }
+  //     );
+  //     if (updated) {
+  //       response.send("Upload sucessful");
+  //     }
+  //   } else {
+  //     response.send({ message: "Unable to upload at the moment" });
+  //   }
+  // };
 
   private getUserById = async (request: Request, response: Response, next: NextFunction) => {
     const id = request.params.id;

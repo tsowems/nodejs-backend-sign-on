@@ -58,10 +58,7 @@ class App {
     //   MONGO_PASSWORD,
     //   MONGO_PATH,
     // } = process.env;
-    mongoose.connect(`mongodb://127.0.0.1:27017/finsweetsso`, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    mongoose.connect("mongodb://127.0.0.1:27017/finsweetsso");
   }
 }
 
